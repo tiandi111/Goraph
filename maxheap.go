@@ -4,102 +4,146 @@ import (
 	"fmt"
 )
 
-// Heap struct
-// BODY is implemented with a slice
-// SIZE point to the position new element will be inserted
-type Heap struct {
-	BODY	[]WeightedNode
-	SIZE	int
+// Heap interface encapsulates the basic operations on a heap
+// This interface isolates the underlying heap struct to users
+// Function description:
+//	add:	add an element to heap
+//	del:	delete the element on the given index
+//	max:	return maximum element
+//	size:	return size
+//	get:	return element on the given index
+type Heap interface {
+	add (e... HeapNode)	(bool, error)
+	del (i int)		(bool, error)
+	max ()			(HeapNode, error)
+	size()			int
+	get (i int)		(HeapNode, error)
 }
 
-// WeightedNode should implement two methods
-// getKey return the key of the node
-// getVal return the value of the node
-type WeightedNode interface {
-	getKey (i int) interface{}
-	getVal (i int) interface{}
+// The underlying heap struct
+// Body is implemented as a slice of HeapNode
+// The type of element inserted to heap must implement HeapNode
+type heap struct {
+	Body	[]HeapNode
+	Size	int
 }
 
-// return the size of the heap
-func (h *Heap) size() int {
-	return h.SIZE
+// HeapNode should implement one function
+// Function Description:
+//	cmp: 	compare a HeapNode with itself
+//		if a > b, return 1
+//		if a = b, return 0
+//		if a < b, return -1
+type HeapNode interface {
+	cmp (a interface{})	int
 }
 
-// return the max value of the heap
-func (h *Heap) max() float64, error {
-	if err := h.validIndex(0); err { 
-		return 0, err
+// Consturctor for Heap
+func NewHeap() Heap{
+	return &heap{make([]HeapNode, 0), 0}
+}
+
+func (h *heap) add(e ...HeapNode) (bool, error) {
+	// e... unpack slice e to multiple HeapNode
+	return h.addNode(e...)
+}
+
+func (h *heap) del(i int) (bool, error) {
+	return h.delNode(i)
+}
+
+func (h *heap) max() (HeapNode, error) {
+	return h.maxNode()
+}
+
+func (h *heap) size() int {
+	return h.getSize()
+}
+
+func (h *heap) get(i int) (HeapNode, error) {
+	return h.getNode(i)
+}
+
+// Add nodes to heap
+func (h *heap) addNode(e ...HeapNode) (bool, error) {
+	arr := e
+	for _, node := range arr {
+		h.addSingle(node)
 	}
-	return h.getVal(0)
+	return true, nil
 }
 
-// add node to the heap
-// first add to the end, then do a bottom-up
-// heapify called swim()
-// return the size after inserting the new node
-func (h *Heap) add(e WeightedNode) int{
-	h.BODY = append(h.BODY, e)
-	h.swim(h.size())
-	return h.SIZE++
+// Add single node to heap
+func (h *heap) addSingle(e HeapNode) (bool, error) {
+	h.Body = append(h.Body, e)
+	h.Size++
+	h.swim(h.Size-1)
+	return true, nil
 }
 
-// return the element
-func (h *Heap) get(i int) interface{}, error {
-	if err := h.validIndex(i); err {
-		return interface{}, err
-	}
-	return h.BODY[i]
-}
-
-// return the key, error is non-nil if the index is invalid
-func (h *Heap) getKey(i int) interface{}, error {
-	if err := h.validIndex(i); err {
-		return interface{}, err 
-	}
-	return h.BODY[i].getKey(i)
-}
-
-// return the value, error is non-nil if the index is invalid
-func (h *Heap) getVal(i int) interface{}, error {
-	if err := h.validIndex(i); err {
-		return interface{}, err
-	}
-	return h.BODY[i].getVal(i)
-} 
-
-// check if the given index is valid
-func (h *Heap) validIndex(i int) bool{
-	if i < 0 || i >= h.size() { return false }
-	return true
-}
-
-// swap element on a and b
-func (h *Heap) swap(a int, b int) bool, error {
-	if err := h.validIndex(a); err {
+// Delete node on given index
+func (h *heap) delNode(i int) (bool, error) {
+	if err := h.checkIndex(i); err != nil {
 		return false, err
 	}
-	if err := h.validIndex(b); err {
-		return false, err
+	h.swap(i, h.Size-1)
+	h.swim(i)
+	h.sink(i)
+	h.Size--
+	return true, nil
+}
+
+// Return the maximum element
+func (h *heap) maxNode() (HeapNode, error) {
+	if err := h.checkIndex(0); err != nil {
+		return nil, err
 	}
-	tmp := h.get(a)
-	h.set(a, h.get(b))
-	h.set(b, tmp)
-	return true
+	return h.Body[0], nil
 }
 
-func (h *Heap) del(i int) int {
-	
+// Return size of the heap 
+func (h *heap) getSize() int {
+	return h.Size
 }
 
-// compare the val of the ith element with its parent
-// if greater, swap
-func (h *Heap) swim(i int) error {
-	if err := validIndex(i); err {return err}
-	for p := (i-1)/2; p >= 0; {
-		if h.compareTo(i, p) > 0 {
-			h.swap(i, p)
+// Get element on the given index
+func (h *heap) getNode(i int) (HeapNode, error) {
+	if err := h.checkIndex(i); err != nil {
+		return nil, err
+	}
+	return h.Body[i], nil
+}
+
+// Swap nodes on index a and index b
+func (h *heap) swap(a int, b int) error{
+	if err := h.checkIndex(a, b); err != nil {
+		return err
+	}
+	B := h.Body
+	B[a], B[b] = B[b], B[a]
+	return nil
+}
+
+// Check the validity of index
+func (h *heap) checkIndex(i ...int) error {
+	arr := i
+	for _, index := range arr {
+		if index < 0 || index >= h.Size {
+			return fmt.Errorf("Index out of bounds: %d", index)
 		}
-		else {
+	}
+	return nil
+}
+
+// Function swim is to Bottom-up heapify the heap 
+func (h *heap) swim(i int) error {
+	if err := h.checkIndex(i); err != nil {
+		return err
+	}
+	for p := (i-1)/2; p >= 0; {
+		if h.Body[i].cmp(h.Body[p]) > 0 {
+			h.swap(i, p)
+		} else {
 			return nil
 		}
 		i = p
@@ -108,13 +152,22 @@ func (h *Heap) swim(i int) error {
 	return nil
 }
 
-func (h *Heap) sink(i int) error {
-	if err := validIndex(i); err {return err}
-	for c := 2*i+1; c < h.size() {
-		swp := 2*i +1
-		if 2*i+2 < h.size() {
-			
+// Function sink is to Top-down heapify the heap
+func (h *heap) sink(i int) error {
+	if err := h.checkIndex(i); err != nil {
+		return err
+	}
+	for j := 2*i+1; j < h.Size; {
+		if j+1 < h.Size && h.Body[j+1].cmp(h.Body[j]) > 0 {
+			j++
 		}
+		if h.Body[i].cmp(h.Body[j]) < 0 {
+			h.swap(i, j)
+		} else {
+			return nil
+		}
+		i = j
+		j = 2*i+1
 	}
 	return nil
 }
