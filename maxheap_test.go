@@ -60,13 +60,31 @@ func TestSwim(t *testing.T) {
 	exp := []HeapNode{ h.Body[3], h.Body[0], h.Body[2], h.Body[1] }
 
 	h.swim(3)
+
 	for i, n := range h.Body {
 		if exp[i] != n {
 			t.Errorf("Incorrect %dth element, Expect %v, but %v", i, exp[i], n)
 		}
 	}
-	fmt.Println("Expected: ", exp)
-	fmt.Println("Your out: ", h.Body)
+}
+
+// Test Sink
+func TestSink(t *testing.T) {
+	h := heap{ make([]HeapNode, 0), 5 }
+
+	h.Body = []HeapNode { Node{0}, Node{2}, Node{1}, Node{3}, Node{4} }
+	exp := []int {2, 4, 1, 3, 0}
+
+	h.sink(0)
+
+	for i, n := range h.Body {
+		if exp[i] != n.(Node).weight {
+			t.Errorf("Incorrect %dth element, Expect %v, but %v", i, exp[i], n)
+		}
+	}
+
+	//fmt.Println("Expected: ", exp)
+	//fmt.Println("Your out: ", h.Body)
 }
 
 // Test add
@@ -83,9 +101,10 @@ func TestAdd(t *testing.T) {
 			t.Errorf("Incorrect %dth element, Expect %v, but %v", i, exp[i], n)
 		}
 	}
-	fmt.Println("Expected: ", exp)
-	fmt.Println("Your out: ", h.Body)
 }
+
+// TODO: Test del
+
 
 // Integration test
 func TestHeap(t *testing.T) {
@@ -93,10 +112,26 @@ func TestHeap(t *testing.T) {
 	testcases := [][]string {
 		{
 			"0 1 t", "0 2 t", "0 3 t", "2 0 3", "3 0 3", "1 2 t", "1 0 t", "1 5 f",
-			"1 0 t",
+			"1 0 t", 
+		},
+		{
+			"2 0 n", "3 0 0", "1 0 f", "4 0 n",
+		},
+		{
+			"0 0 t", "2 0 0", 
+			"0 1 t", "2 0 1", 
+			"0 2 t", "2 0 2", 
+			"0 3 t", "2 0 3", 
+			"0 4 t", "2 0 4",
+			"1 0 t", "2 0 3",
+			"1 0 t", "2 0 2",
+			"1 0 t", "2 0 1",
+			"1 0 t", "2 0 0",
+			"1 0 t", "2 0 n",
+			"1 0 f", "2 0 n",
 		},
 	}
-	for _, tc := range testcases {
+	for index, tc := range testcases {
 		h := heap{make([]HeapNode, 0), 0}
 		
 		oprOut := make([]string, 0)
@@ -116,11 +151,12 @@ func TestHeap(t *testing.T) {
 			eOut = append(eOut, e.exp)
 			rOut = append(rOut, r)
 		}
-	
-		fmt.Println("Operation:", oprOut)
-		fmt.Println("Operand:  ", opdOut)
-		fmt.Println("Expected: ", eOut)
-		fmt.Println("Your out: ", rOut)
+		
+		fmt.Println("The ", index, "th Testcase: ")
+		fmt.Println("	Operation:", oprOut)
+		fmt.Println("	Operand:  ", opdOut)
+		fmt.Println("	Expected: ", eOut)
+		fmt.Println("	Your out: ", rOut)
 	}
 }
 
@@ -129,22 +165,41 @@ func getEvent(in string) Event {
 	s := strings.Split(in, " ")
 	e := Event{}
 	e.opr, _ = strconv.Atoi(s[0])
-	if e.opr == 0 {
-		val, _ := strconv.Atoi( s[1] )
-		e.opd = Node{ val } 
-	} else {
-		e.opd, _ = strconv.Atoi( s[1] )
-	}
-	if e.opr < 2 {
-		if s[2] == "t" {
-			e.exp = true
-		}
-	} else {
-		e.exp, _ = strconv.Atoi( s[2] )
-	}
+	setOpd( &e, s[1] )
+	setExp( &e, s[2] )
 	return e
 }
 
+// Convert string to operand for Event
+func setOpd( e *Event, opd string ) {
+	switch e.opr {
+		case 0:
+			val, _ := strconv.Atoi(opd)
+			e.opd = Node{ val }
+		default:
+			e.opd, _ = strconv.Atoi(opd)
+	}
+}
+
+// Convert string to expectation for Event 
+func setExp( e *Event, exp string ) {
+	switch e.opr {
+		case 0, 1:
+			if exp == "t" {
+				e.exp = true
+			} else {
+				e.exp = false
+			}
+		case 2, 4:
+			if exp == "n" {
+				e.exp = nil
+			} else {
+				e.exp, _ = strconv.Atoi(exp)
+			}
+		case 3:
+			e.exp, _ = strconv.Atoi(exp)
+	}
+}
 
 // Execute the given event 
 func Execute(h *heap, e *Event) interface{} {
@@ -159,14 +214,18 @@ func Execute(h *heap, e *Event) interface{} {
 		// max
 		case 2: 
 			n, _ := h.max()
-			r = n.(Node).weight
+			if n != nil {
+				r = n.(Node).weight
+			} 
 		// size
 		case 3: 
 			r = h.size()
 		// get
 		case 4: 
 			n, _ := h.get( e.opd.(int) )
-			r = n.(Node).weight
+			if n != nil {
+				r = n.(Node).weight
+			}
 		
 	}
 	return r

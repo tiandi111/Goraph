@@ -86,10 +86,14 @@ func (h *heap) delNode(i int) (bool, error) {
 	if err := h.checkIndex(i); err != nil {
 		return false, err
 	}
+	// Note: swap should appear before size--
+	// Because swap utilize checkIndex() which return error
+	// if given idex is equal to h.Size
+	// ps: Never send h.Size to function swap, swim and sink!!!!!
 	h.swap(i, h.Size-1)
+	h.Size--
 	h.swim(i)
 	h.sink(i)
-	h.Size--
 	return true, nil
 }
 
@@ -141,6 +145,8 @@ func (h *heap) swim(i int) error {
 		return err
 	}
 	for p := (i-1)/2; p >= 0; {
+		// If ith element larger than its parent, swap
+		// otherwise, return
 		if h.Body[i].cmp(h.Body[p]) > 0 {
 			h.swap(i, p)
 		} else {
@@ -158,9 +164,12 @@ func (h *heap) sink(i int) error {
 		return err
 	}
 	for j := 2*i+1; j < h.Size; {
+		// Choose a larger child to compare
 		if j+1 < h.Size && h.Body[j+1].cmp(h.Body[j]) > 0 {
 			j++
 		}
+		// If ith element smaller than its child, swap
+		// otherwise, return
 		if h.Body[i].cmp(h.Body[j]) < 0 {
 			h.swap(i, j)
 		} else {
