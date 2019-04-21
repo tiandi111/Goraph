@@ -75,9 +75,11 @@ func (h *heap) addNode(e ...HeapNode) (bool, error) {
 
 // Add single node to heap
 func (h *heap) addSingle(e HeapNode) (bool, error) {
+	//fmt.Println("Before add: ", h.Body)
 	h.Body = append(h.Body, e)
 	h.Size++
 	h.swim(h.Size-1)
+	//fmt.Println("After add: ", h.Body)
 	return true, nil
 }
 
@@ -86,6 +88,7 @@ func (h *heap) delNode(i int) (bool, error) {
 	if err := h.checkIndex(i); err != nil {
 		return false, err
 	}
+	//fmt.Println("Before del: ", h.Body)
 	// Note: swap should appear before size--
 	// Because swap utilize checkIndex() which return error
 	// if given idex is equal to h.Size
@@ -94,6 +97,7 @@ func (h *heap) delNode(i int) (bool, error) {
 	h.Size--
 	h.swim(i)
 	h.sink(i)
+	//fmt.Println("After del: ", h.Body)
 	return true, nil
 }
 
