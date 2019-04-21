@@ -3,12 +3,39 @@ package goraph
 import (
 	"fmt"
 	"testing"
+	"math/rand"
 )
 
 func TestMBP(t *testing.T) {
-	g := NewUndirectedGraph(5, 3, -1, 10, true)
-	fmt.Println( g.AdjList )
-	fmt.Println( getMBP(g, 0, 0) )
+	testcases := []struct {
+		Size 		int
+		AvgENum 	int
+		Density		float64
+		MaxWeight	float64
+		Connected	bool
+	}{
+		{10, 2, -1.0, 10, true},
+		{10, -1, 0.6, 100, true},
+		{10, 2, -1.0, 1, false},
+		{5000, 6, -1.0, 2500, true},
+		//{5000, -1, 0.2, 64, true},
+	}
+	for _, tc := range testcases {
+		descr := fmt.Sprintf("Graph(size: %d, average edges: %d, density: %f, maxweight: %f, connected: %t)", tc.Size, tc.AvgENum, tc.Density, tc.MaxWeight, tc.Connected)
+		// get arributes
+		g := NewUndirectedGraph(tc.Size, tc.AvgENum, tc.Density, tc.MaxWeight, tc.Connected)
+		sc := rand.Intn(g.Size)
+		tm := rand.Intn(g.Size)
+		exp := getMBP(g, sc, tm)
+		r  := MBP(g, sc, tm)
+		if exp != r {
+			t.Errorf("\nGraph: %q\n    Source:%d\n    Terminal:%d\n    Expect %f, but get %f", descr, sc, tm, exp, r)
+		}
+	}
+}
+
+func MBP(g *Graph, s int, t int) float64 {
+	return 0
 }
 
 // A trivial but reliable test algorithm is DFS
@@ -21,7 +48,7 @@ func getMBP(g *Graph, s int, t int) float64{
 	}
 	visited := make([]bool, len(g.AdjList))
 	var max float64 = 0
-	getMBPHelper(g.AdjList, s, t, s, visited, 10, &max)
+	getMBPHelper(g.AdjList, s, t, s, visited, g.MaxWeight, &max)
 	return max
 }
 
