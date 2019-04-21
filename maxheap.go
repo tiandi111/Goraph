@@ -18,6 +18,7 @@ type Heap interface {
 	max ()			(HeapNode, error)
 	size()			int
 	get (i int)		(HeapNode, error)
+	set (i int, n HeapNode)	(bool, error)
 }
 
 // The underlying heap struct
@@ -64,6 +65,10 @@ func (h *heap) get(i int) (HeapNode, error) {
 	return h.getNode(i)
 }
 
+func (h *heap) set(i int, n HeapNode) (bool, error) {
+	return h.setNode(i, n)
+}
+
 // Add nodes to heap
 func (h *heap) addNode(e ...HeapNode) (bool, error) {
 	arr := e
@@ -97,7 +102,6 @@ func (h *heap) delNode(i int) (bool, error) {
 	h.Size--
 	h.swim(i)
 	h.sink(i)
-	//fmt.Println("After del: ", h.Body)
 	return true, nil
 }
 
@@ -120,6 +124,19 @@ func (h *heap) getNode(i int) (HeapNode, error) {
 		return nil, err
 	}
 	return h.Body[i], nil
+}
+
+// Set the element on i to a new HeapNode
+// Then do a swim and a sink to heapify the heap
+func (h *heap) setNode(i int, n HeapNode) (bool, error) {
+	if err := h.checkIndex(i); err != nil {
+		return false, err
+	}
+	h.Body[i] = n
+	h.swim(i)
+	h.sink(i)
+	return true, nil
+	
 }
 
 // Swap nodes on index a and index b

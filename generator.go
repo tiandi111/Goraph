@@ -24,6 +24,7 @@ func main() {
 	fmt.Print(g)
 }
 
+// Create undirected graph
 func NewUndirectedGraph(size int, avgenum int, density float64, maxweight float64, connected bool) *Graph {
 	g := Graph{make([][]Edge, size), size, avgenum, density, maxweight, connected}
 	for i := range g.AdjList {
@@ -32,20 +33,23 @@ func NewUndirectedGraph(size int, avgenum int, density float64, maxweight float6
 	// total number of edges need to create
 	totalEdges := 0
 	if avgenum >= 0 {totalEdges = avgenum*size/2}
-	// if both avgenum and density is non-negative, ignore avgenum 
+	// if both avgenum and density is non-negative, use density 
 	if density >= 0 {totalEdges = int(density * float64((size-1)*size/2))}
+	exsit := make(map[int]bool, 2*totalEdges)
 	if connected {
-		ConnectGraph(&g)
-		totalEdges -= size
+		ConnectGraph(&g, exsit)
+		//totalEdges -= size
 	}
-	BuildGraph(&g, totalEdges)
+	BuildGraph(&g, totalEdges, exsit)
 	return &g
 }
 
-func BuildGraph(g *Graph, e int) {
+// Randomly build edges in graph
+// No two edges will have the same head and tail
+func BuildGraph(g *Graph, e int, exsit map[int]bool) {
 	hashFactor := g.Size
-	exsit := make(map[int]bool, 2*e)
-	rand.Seed(1)
+	//exsit := make(map[int]bool, 2*e)
+	//rand.Seed(1)
 	for len(exsit)<2*e {
 		head := rand.Intn(g.Size)
 		tail := rand.Intn(g.Size)
@@ -57,8 +61,11 @@ func BuildGraph(g *Graph, e int) {
 	}
 }
 
-func ConnectGraph(g *Graph) {
+// Randomly generate a connected path inside the graph
+func ConnectGraph(g *Graph, exsit map[int]bool) {
+	hashFactor := g.Size
 	l := g.AdjList
+	// A map to record which vertices havn't been connected to the graph
 	unconnected := make(map[int]bool, len(l))
 	for i := 0; i<len(l); i++ {unconnected[i] = true}
 	prev := -1
@@ -66,14 +73,19 @@ func ConnectGraph(g *Graph) {
 	for k, _ := range unconnected {
 		if prev >= 0 {
 			g.add(prev, k)
+			exsit[prev * hashFactor + k] = true
+			exsit[k * hashFactor + prev] = true 
 		} else {
 			head = k
 		}
 		prev = k
 	}
 	g.add(prev, head)
+	exsit[prev * hashFactor + head] = true
+	exsit[head * hashFactor + prev] = true 
 }
 
+// Add edge
 func (g *Graph) add(a int, b int) {
 	//rand.Seed(1)
 	w := rand.Float64()*g.MaxWeight

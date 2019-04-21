@@ -14,6 +14,7 @@ import (
 //	2:	max
 //	3: 	size
 //	4:	get
+// 	5:	set
 // opd(operand)	and res(result) are
 type Event struct {
 	opr	int
@@ -104,6 +105,33 @@ func TestAdd(t *testing.T) {
 }
 
 // TODO: Test del
+
+// Test Set
+func TestSet(t *testing.T) {
+	h := heap{make([]HeapNode, 0), 0}
+
+	for i := 0; i < 5; i++ {
+		h.addSingle( Node{i} )
+	}
+	exp := [][]int {
+		{3, 2, 1, 0, -1},
+		{5, 3, 1, 0, -1},
+	}
+	
+	h.setNode(0, Node{-1} )
+	for i, n := range h.Body {
+		if exp[0][i] != n.(Node).weight {
+			t.Errorf("Incorrect %dth element, Expect %v, but %v", i, exp[0][i], n)
+		}
+	}
+
+	h.setNode(1, Node{5} )
+	for i, n := range h.Body {
+		if exp[1][i] != n.(Node).weight {
+			t.Errorf("Incorrect %dth element, Expect %v, but %v", i, exp[1][i], n)
+		}
+	}
+}
 
 
 // Integration test

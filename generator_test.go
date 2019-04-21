@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+// Integration test on generator
+// 
 func TestGenerator(t *testing.T) {
 	testcases := []struct {
 		Size 		int
@@ -52,10 +54,11 @@ func TestGenerator(t *testing.T) {
 	}
 }
 
+// DFS to detect connectivity
 func DFS(g *Graph) bool {
 	visited := make([]bool, len(g.AdjList))
 	// Traverse the graph, if the graph is connected, we should have seen all vertices 
-	// otherwise, it is un-connected
+	// otherwise, it is unconnected
 	DFShelper(g.AdjList, 0, visited)
 	for _, seen := range visited {
 		if !seen {
