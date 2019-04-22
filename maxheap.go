@@ -36,6 +36,7 @@ type heap struct {
 //		if a = b, return 0
 //		if a < b, return -1
 type HeapNode interface {
+	setIdx (i int)	bool
 	cmp (a interface{})	int
 }
 
@@ -145,6 +146,8 @@ func (h *heap) swap(a int, b int) error{
 		return err
 	}
 	B := h.Body
+	B[a].setIdx(b)
+	B[b].setIdx(a)
 	B[a], B[b] = B[b], B[a]
 	return nil
 }

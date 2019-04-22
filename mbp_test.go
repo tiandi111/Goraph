@@ -14,10 +14,10 @@ func TestMBP(t *testing.T) {
 		MaxWeight	float64
 		Connected	bool
 	}{
-		{10, 2, -1.0, 10, true},
-		{10, -1, 0.6, 100, true},
-		{10, 2, -1.0, 1, false},
-		{5000, 6, -1.0, 2500, true},
+		{9, 4, 0.6, 10, true},
+		//{10, -1, 0.6, 100, true},
+		//{10, 2, -1.0, 1, false},
+		//{5000, 6, -1.0, 2500, true},
 		//{5000, -1, 0.2, 64, true},
 	}
 	for _, tc := range testcases {
@@ -27,16 +27,16 @@ func TestMBP(t *testing.T) {
 		sc := rand.Intn(g.Size)
 		tm := rand.Intn(g.Size)
 		exp := getMBP(g, sc, tm)
-		r  := MBP(g, sc, tm)
+		r  := MBP(g, sc, tm, "Dijkstra_Heap")
 		if exp != r {
 			t.Errorf("\nGraph: %q\n    Source:%d\n    Terminal:%d\n    Expect %f, but get %f", descr, sc, tm, exp, r)
 		}
 	}
 }
 
-func MBP(g *Graph, s int, t int) float64 {
-	return 0
-}
+//func MBP(g *Graph, s int, t int) float64 {
+//	return 0
+//}
 
 // A trivial but reliable test algorithm is DFS
 // Simply traverse all possible paths and take the maximum bandwidth
@@ -65,9 +65,10 @@ func getMBPHelper(l [][]Edge, s int, t int, cur int, visited []bool, bw float64,
 
 	for _, edge := range l[cur] {
 		if edge.weight < bw {
-			bw = edge.weight
+			getMBPHelper(l ,s, t, edge.tail, visited, edge.weight, max)
+		} else {
+			getMBPHelper(l, s, t, edge.tail, visited, bw, max)
 		}
-		getMBPHelper(l, s, t, edge.tail, visited, bw, max)
 	}
 }
 

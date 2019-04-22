@@ -35,10 +35,11 @@ func NewUndirectedGraph(size int, avgenum int, density float64, maxweight float6
 	if avgenum >= 0 {totalEdges = avgenum*size/2}
 	// if both avgenum and density is non-negative, use density 
 	if density >= 0 {totalEdges = int(density * float64((size-1)*size/2))}
+	// Keep track of which vertex pair alreay has an edge
+	// so that we never create repeat edges
 	exsit := make(map[int]bool, 2*totalEdges)
 	if connected {
 		ConnectGraph(&g, exsit)
-		//totalEdges -= size
 	}
 	BuildGraph(&g, totalEdges, exsit)
 	return &g
@@ -48,8 +49,6 @@ func NewUndirectedGraph(size int, avgenum int, density float64, maxweight float6
 // No two edges will have the same head and tail
 func BuildGraph(g *Graph, e int, exsit map[int]bool) {
 	hashFactor := g.Size
-	//exsit := make(map[int]bool, 2*e)
-	//rand.Seed(1)
 	for len(exsit)<2*e {
 		head := rand.Intn(g.Size)
 		tail := rand.Intn(g.Size)
@@ -87,7 +86,6 @@ func ConnectGraph(g *Graph, exsit map[int]bool) {
 
 // Add edge
 func (g *Graph) add(a int, b int) {
-	//rand.Seed(1)
 	w := rand.Float64()*g.MaxWeight
 	g.AdjList[a] = append(g.AdjList[a], Edge{b, w})
 	g.AdjList[b] = append(g.AdjList[b], Edge{a, w}) 

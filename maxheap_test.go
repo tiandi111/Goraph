@@ -32,6 +32,11 @@ func (n Node) cmp(a interface{}) int {
 	return n.weight-a.(Node).weight
 }
 
+// implement setIdx
+func (n Node) setIdx(i int) bool {
+	return true
+}
+
 // Test swap
 func TestSwap(t *testing.T) {
 	h := heap{make([]HeapNode, 0), 0}
