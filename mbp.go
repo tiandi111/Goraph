@@ -86,3 +86,7 @@ func DijHeap(g *Graph, s int, t int) float64 {
 	
 	return mbw[t].(*gNode).bw
 }
+
+//func Kru(g *Graph, s int, t int) float64 {
+//
+//}
