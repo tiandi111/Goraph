@@ -15,9 +15,9 @@ func TestMBP(t *testing.T) {
 		Connected	bool
 	}{
 		{9, 4, 0.6, 10, true},
-		//{10, -1, 0.6, 100, true},
-		//{10, 2, -1.0, 1, false},
-		//{5000, 6, -1.0, 2500, true},
+		{10, -1, 0.6, 100, true},
+		{200, -1, 0.2, 1, true},
+		{5000, 6, -1.0, 2500, true},
 		//{5000, -1, 0.2, 64, true},
 	}
 	for _, tc := range testcases {
@@ -26,8 +26,9 @@ func TestMBP(t *testing.T) {
 		g := NewUndirectedGraph(tc.Size, tc.AvgENum, tc.Density, tc.MaxWeight, tc.Connected)
 		sc := rand.Intn(g.Size)
 		tm := rand.Intn(g.Size)
-		exp := getMBP(g, sc, tm)
-		r  := MBP(g, sc, tm, "Dijkstra_Heap")
+		//exp := getMBP(g, sc, tm)
+		exp := MBP(g, sc, tm, "Dijkstra_Heap")
+		r  := MBP(g, sc, tm, "Kruskal")
 		if exp != r {
 			t.Errorf("\nGraph: %q\n    Source:%d\n    Terminal:%d\n    Expect %f, but get %f", descr, sc, tm, exp, r)
 		}

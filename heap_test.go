@@ -164,7 +164,7 @@ func TestHeap(t *testing.T) {
 			"1 0 f", "2 0 n",
 		},
 	}
-	for index, tc := range testcases {
+	for _, tc := range testcases {
 		h := heap{make([]HeapNode, 0), 0}
 		
 		oprOut := make([]string, 0)
@@ -185,11 +185,12 @@ func TestHeap(t *testing.T) {
 			rOut = append(rOut, r)
 		}
 		
-		fmt.Println("The ", index, "th Testcase: ")
-		fmt.Println("	Operation:", oprOut)
-		fmt.Println("	Operand:  ", opdOut)
-		fmt.Println("	Expected: ", eOut)
-		fmt.Println("	Your out: ", rOut)
+	//	fmt.Println("The ", index, "th Testcase: ")
+	//	fmt.Println("	Operation:", oprOut)
+	//	fmt.Println("	Operand:  ", opdOut)
+	//	fmt.Println("	Expected: ", eOut)
+	//	fmt.Println("	Your out: ", rOut)
+		
 	}
 }
 
