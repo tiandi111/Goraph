@@ -83,6 +83,7 @@ func Dij(g *Graph, s int, t int) float64 {
 				bw[nei] = min
 			}
 		}
+		//fmt.Println(len(visited))
 	}
 	return bw[t]
 }
@@ -160,3 +161,38 @@ func Kru(g *Graph, s int, t int) float64 {
 	// DFS to calculate maximum bandwidth
 	return getMBP(mstG, s, t)
 }
+
+// For a tree-like graph, we can use dfs to fet the maximum bandwidth path from
+// source to terminal node
+func getMBP(g *Graph, s int, t int) float64{
+	// This algorithm only cares about connected graph
+	if !g.Connected {
+		fmt.Println("Graph should be connected!")
+		return -1 
+	}
+	visited := make([]bool, len(g.AdjList))
+	var max float64 = 0
+	getMBPHelper(g.AdjList, s, t, s, visited, g.MaxWeight, &max)
+	return max
+}
+
+func getMBPHelper(l [][]Edge, s int, t int, cur int, visited []bool, bw float64, max *float64) {
+	if visited[cur] { return }
+	if cur == t {
+		if bw > *max {
+			*max = bw
+		}
+		return
+	}
+
+	visited[cur] = true
+
+	for _, edge := range l[cur] {
+		if edge.weight < bw {
+			getMBPHelper(l ,s, t, edge.tail, visited, edge.weight, max)
+		} else {
+			getMBPHelper(l, s, t, edge.tail, visited, bw, max)
+		}
+	}
+}
+
