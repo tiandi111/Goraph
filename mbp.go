@@ -41,7 +41,7 @@ func (n *gNode) setBw(q Heap, b float64) {
 func MBP(g *Graph, s int, t int, alg string) float64 {
 	switch alg {
 		case "Dijkstra":
-		//	return Dij(g, s, t)
+			return Dij(g, s, t)
 		case "Dijkstra_Heap":
 			return DijHeap(g, s, t)
 		case "Kruskal":
@@ -51,6 +51,40 @@ func MBP(g *Graph, s int, t int, alg string) float64 {
 			return -1
 	}
 	return -1
+}
+
+// Dijkstra without heap
+func Dij(g *Graph, s int, t int) float64 {
+	// Initialize two arrays
+	// bw for recording maximum bandwidth
+	// visited for recording which vertices havn'r been visited
+	bw := make( []float64, g.Size )
+	visited := make( map[int]bool, 0 )
+	bw[s] = g.MaxWeight
+	// Main while loop
+	for len(visited) < g.Size {
+		// Find the vertex with maximum bandwitdth in unvisited set
+		cur := -1
+		curBw := float64(-1)
+		for i, mbw := range bw {
+			_, seen := visited[i]
+			if !seen && mbw > curBw {
+				cur = i
+				curBw = mbw
+			}
+		}
+		// Mark it as visited
+		visited[cur] = true
+		// Update bandwidth
+		for _, edge := range g.AdjList[cur] {
+			nei := edge.tail
+			min := math.Min( bw[cur], edge.weight )
+			if min > bw[nei] {
+				bw[nei] = min
+			}
+		}
+	}
+	return bw[t]
 }
 
 // Modified Dijkstra algorithm, using heap

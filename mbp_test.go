@@ -27,8 +27,8 @@ func TestMBP(t *testing.T) {
 		sc := rand.Intn(g.Size)
 		tm := rand.Intn(g.Size)
 		//exp := getMBP(g, sc, tm)
-		exp := MBP(g, sc, tm, "Dijkstra_Heap")
-		r  := MBP(g, sc, tm, "Kruskal")
+		exp := MBP(g, sc, tm, "Kruskal")
+		r  := MBP(g, sc, tm, "Dijkstra")
 		if exp != r {
 			t.Errorf("\nGraph: %q\n    Source:%d\n    Terminal:%d\n    Expect %f, but get %f", descr, sc, tm, exp, r)
 		}
